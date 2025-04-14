@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>vn.dungnt</groupId>
-    <artifactId>webshop_be</artifactId>
+    <artifactId>webshop-be</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>webshop-be</name>
     <description>Demo project for Spring Boot</description>
