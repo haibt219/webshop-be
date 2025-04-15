@@ -6,43 +6,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import vn.dungnt.webshop_be.entity.Account;
 import vn.dungnt.webshop_be.entity.Customer;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    // Tìm kiếm khách hàng theo email
-    Optional<Customer> findByEmail(String email);
+  @Query(
+      "SELECT c FROM Customer c WHERE "
+          + "(:searchTerm IS NULL OR "
+          + "LOWER(c.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+          + "LOWER(c.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+          + "LOWER(c.phone) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) AND "
+          + "(:status IS NULL OR c.status = :status)")
+  Page<Customer> findCustomers(
+      @Param("searchTerm") String searchTerm,
+      @Param("status") Account.Status status,
+      Pageable pageable);
 
-    // Tìm kiếm khách hàng theo số điện thoại
-    Optional<Customer> findByPhone(String phone);
+  Customer findByEmail(String email);
 
-    // Tìm kiếm khách hàng theo trạng thái
-    List<Customer> findByStatus(Customer.Status status);
+  Customer findByUsername(String username);
 
-    // Tìm kiếm khách hàng theo từ khóa (tên, email, phone)
-    @Query("SELECT c FROM Customer c WHERE (c.name LIKE %:keyword% OR c.email LIKE %:keyword% OR c.phone LIKE %:keyword%)")
-    Page<Customer> searchCustomers(@Param("keyword") String keyword, Pageable pageable);
+  Customer findByPhone(String phone);
 
-    @Query("SELECT c FROM Customer c WHERE (c.name LIKE %:keyword% OR c.email LIKE %:keyword% OR c.phone LIKE %:keyword%) AND c.status = :status")
-    Page<Customer> searchCustomersByStatusAndKeyword(@Param("keyword") String keyword, @Param("status") Customer.Status status, Pageable pageable);
+  long countByStatus(Account.Status status);
 
-    // Lấy danh sách khách hàng có đơn hàng trong khoảng thời gian
-    @Query("SELECT c FROM Customer c WHERE c.lastOrderDate BETWEEN :startDate AND :endDate")
-    List<Customer> findCustomersByOrderDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+  boolean existsByEmail(String email);
 
-    // Lấy danh sách khách hàng có tổng chi tiêu lớn hơn một mức cụ thể
-    List<Customer> findByTotalSpentGreaterThan(BigDecimal amount);
+  boolean existsByUsername(String username);
 
-    // Lấy danh sách khách hàng theo thời gian tạo
-    List<Customer> findByCreatedAtBetween(Date startDate, Date endDate);
-
-    // Đếm số lượng khách hàng theo trạng thái
-    @Query("SELECT COUNT(c) FROM Customer c WHERE c.status = :status")
-    Long countByStatus(@Param("status") Customer.Status status);
+  boolean existsByPhone(String phone);
 }

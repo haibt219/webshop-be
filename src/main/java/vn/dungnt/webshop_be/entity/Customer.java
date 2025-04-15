@@ -1,167 +1,120 @@
 package vn.dungnt.webshop_be.entity;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "customers")
-public class Customer {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Customer extends Account {
 
-    @Column(nullable = false)
-    private String name;
+  @Column(length = 15, nullable = false)
+  private String phone;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+  @Column(nullable = false)
+  private String address;
 
-    @Column(length = 15)
-    private String phone;
+  @Column(name = "total_orders")
+  private Integer totalOrders = 0;
 
-    @Column(length = 255)
-    private String address;
+  @Column(name = "total_spent", precision = 10, scale = 2)
+  private BigDecimal totalSpent = BigDecimal.ZERO;
 
-    @Column(name = "total_orders")
-    private Integer totalOrders;
+  @Column(name = "last_order_date")
+  private LocalDateTime lastOrderDate;
 
-    // Sử dụng BigDecimal cho totalSpent để đảm bảo độ chính xác
-    @Column(name = "total_spent", precision = 10, scale = 2)
-    private BigDecimal totalSpent;
+  public Customer() {
+    super();
+  }
 
-    // Lưu trữ ngày tháng của lần đặt hàng cuối cùng
-    @Column(name = "last_order_date")
-    private LocalDateTime lastOrderDate;
+  public Customer(
+      String name,
+      String username,
+      String password,
+      String email,
+      RoleEnum role,
+      String phone,
+      String address) {
+    super(
+        null,
+        name,
+        username,
+        password,
+        email,
+        role,
+        Account.Status.ACTIVE,
+        true,
+        true,
+        true,
+        true,
+        LocalDateTime.now());
+    this.phone = phone;
+    this.address = address;
+    this.totalOrders = 0;
+    this.totalSpent = BigDecimal.ZERO;
+  }
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
+  public String getPhone() {
+    return phone;
+  }
 
-    // Cột createdAt sẽ tự động được tạo bởi Hibernate khi tạo đối tượng
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
 
-    // Enum cho trạng thái khách hàng
-    public enum Status {
-        ACTIVE,
-        INACTIVE,
-        BLOCKED
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
+
+  public Integer getTotalOrders() {
+    return totalOrders;
+  }
+
+  public void setTotalOrders(Integer totalOrders) {
+    this.totalOrders = totalOrders;
+  }
+
+  public BigDecimal getTotalSpent() {
+    return totalSpent;
+  }
+
+  public void setTotalSpent(BigDecimal totalSpent) {
+    this.totalSpent = totalSpent;
+  }
+
+  public LocalDateTime getLastOrderDate() {
+    return lastOrderDate;
+  }
+
+  public void setLastOrderDate(LocalDateTime lastOrderDate) {
+    this.lastOrderDate = lastOrderDate;
+  }
+
+  public void incrementTotalOrders() {
+    this.totalOrders++;
+  }
+
+  public void addToTotalSpent(BigDecimal amount) {
+    if (amount == null) {
+      return;
     }
 
-    // Constructor mặc định cho JPA
-    public Customer() {
+    if (this.totalSpent == null) {
+      this.totalSpent = amount;
+    } else {
+      this.totalSpent = this.totalSpent.add(amount);
     }
 
-    // Constructor đầy đủ cho khách hàng với các trường bắt buộc
-    public Customer(String name, String email, Status status) {
-        this.name = name;
-        this.email = email;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();  // Tự động gán ngày giờ hiện tại
-        this.totalOrders = 0;
-        this.totalSpent = BigDecimal.ZERO;  // Khởi tạo giá trị mặc định cho totalSpent
-    }
+    this.lastOrderDate = LocalDateTime.now();
+    this.incrementTotalOrders();
+  }
 
-    // Getter và Setter cho các thuộc tính
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Integer getTotalOrders() {
-        return totalOrders;
-    }
-
-    public void setTotalOrders(Integer totalOrders) {
-        this.totalOrders = totalOrders;
-    }
-
-    public BigDecimal getTotalSpent() {
-        return totalSpent;
-    }
-
-    public void setTotalSpent(BigDecimal totalSpent) {
-        this.totalSpent = totalSpent;
-    }
-
-    public LocalDateTime getLastOrderDate() {
-        return lastOrderDate;
-    }
-
-    public void setLastOrderDate(LocalDateTime lastOrderDate) {
-        this.lastOrderDate = lastOrderDate;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    // Các phương thức nghiệp vụ (business methods)
-    public void incrementTotalOrders() {
-        if (this.totalOrders == null) {
-            this.totalOrders = 1;
-        } else {
-            this.totalOrders++;
-        }
-    }
-
-    // Phương thức để cộng thêm tiền vào totalSpent
-    public void addToTotalSpent(BigDecimal amount) {
-        if (this.totalSpent == null) {
-            this.totalSpent = amount;
-        } else {
-            this.totalSpent = this.totalSpent.add(amount);
-        }
-        this.lastOrderDate = LocalDateTime.now();
-    }
+  public boolean isVip() {
+    return this.totalOrders > 5 && this.totalSpent.compareTo(BigDecimal.valueOf(1000)) > 0;
+  }
 }

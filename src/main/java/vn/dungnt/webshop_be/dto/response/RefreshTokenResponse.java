@@ -1,15 +1,15 @@
 package vn.dungnt.webshop_be.dto.response;
 
-public class LoginResponse {
+import java.io.Serializable;
+
+public class RefreshTokenResponse implements Serializable {
   private String accessToken;
-  private String refreshToken;
   private Long expiresAt;
 
-  LoginResponse() {}
+  public RefreshTokenResponse() {}
 
-  public LoginResponse(String accessToken, String refreshToken, Long expiresAt) {
+  public RefreshTokenResponse(String accessToken, Long expiresAt) {
     this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
     this.expiresAt = expiresAt;
   }
 
@@ -19,14 +19,6 @@ public class LoginResponse {
 
   public void setAccessToken(String accessToken) {
     this.accessToken = accessToken;
-  }
-
-  public String getRefreshToken() {
-    return refreshToken;
-  }
-
-  public void setRefreshToken(String refreshToken) {
-    this.refreshToken = refreshToken;
   }
 
   public Long getExpiresAt() {

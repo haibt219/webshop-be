@@ -1,130 +1,159 @@
 package vn.dungnt.webshop_be.service.impl;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import vn.dungnt.webshop_be.dto.CustomerDTO;
+import vn.dungnt.webshop_be.entity.Account;
 import vn.dungnt.webshop_be.entity.Customer;
+import vn.dungnt.webshop_be.entity.RoleEnum;
+import vn.dungnt.webshop_be.exception.ResourceNotFoundException;
+import vn.dungnt.webshop_be.exception.ValidationException;
 import vn.dungnt.webshop_be.repository.CustomerRepository;
 import vn.dungnt.webshop_be.service.CustomerService;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class CustomerServiceImpl implements CustomerService {
+  @Autowired private CustomerRepository customerRepository;
+  @Autowired private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Override
-    public Page<Customer> searchCustomersWithPagination(String keyword, Customer.Status status, Pageable pageable) {
-        if (status != null) {
-            return customerRepository.searchCustomersByStatusAndKeyword(keyword, status, pageable);
-        } else {
-            return customerRepository.searchCustomers(keyword, pageable);
-        }
+  @Override
+  @Transactional
+  public CustomerDTO createCustomer(CustomerDTO customerDTO) {
+    // Kiểm tra tính duy nhất
+    if (!isUsernameUnique(customerDTO.getUsername())) {
+      throw new ValidationException("Tên đăng nhập đã tồn tại");
     }
 
-    // Lấy khách hàng theo ID
-    public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + id));
+    if (!isEmailUnique(customerDTO.getEmail())) {
+      throw new ValidationException("Email đã được sử dụng");
     }
 
-    // Lấy khách hàng theo email
-    public Optional<Customer> getCustomerByEmail(String email) {
-        return customerRepository.findByEmail(email);
+    if (!isPhoneUnique(customerDTO.getPhone())) {
+      throw new ValidationException("Số điện thoại đã được sử dụng");
     }
 
-    // Lấy danh sách khách hàng theo trạng thái
-    public List<Customer> getCustomersByStatus(Customer.Status status) {
-        return customerRepository.findByStatus(status);
+    // Tạo khách hàng mới
+    Customer customer =
+        new Customer(
+            customerDTO.getName(),
+            customerDTO.getUsername(),
+            passwordEncoder.encode(customerDTO.getPassword()),
+            customerDTO.getEmail(),
+            RoleEnum.CUSTOMER,
+            customerDTO.getPhone(),
+            customerDTO.getAddress());
+
+    // Lưu và trả về DTO
+    Customer savedCustomer = customerRepository.save(customer);
+    return convertToDTO(savedCustomer);
+  }
+
+  @Override
+  @Transactional
+  public CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO) {
+    // Tìm khách hàng
+    Customer existingCustomer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
+
+    // Cập nhật thông tin
+    existingCustomer.setName(customerDTO.getName());
+    existingCustomer.setPhone(customerDTO.getPhone());
+    existingCustomer.setAddress(customerDTO.getAddress());
+
+    // Kiểm tra và cập nhật email nếu thay đổi
+    if (!existingCustomer.getEmail().equals(customerDTO.getEmail())) {
+      if (!isEmailUnique(customerDTO.getEmail())) {
+        throw new ValidationException("Email đã được sử dụng");
+      }
+      existingCustomer.setEmail(customerDTO.getEmail());
     }
 
-    // Thêm khách hàng mới
-    @Transactional
-    public Customer createCustomer(Customer customer) {
-        // Kiểm tra email đã tồn tại
-        if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
-        }
+    // Lưu và trả về
+    Customer updatedCustomer = customerRepository.save(existingCustomer);
+    return convertToDTO(updatedCustomer);
+  }
 
-        // Đặt giá trị mặc định nếu cần
-        if (customer.getCreatedAt() == null) {
-            customer.setCreatedAt(java.time.LocalDateTime.now());  // Đặt giá trị mặc định cho createdAt
-        }
-        if (customer.getTotalOrders() == null) {
-            customer.setTotalOrders(0);
-        }
-        if (customer.getTotalSpent() == null) {
-            customer.setTotalSpent(BigDecimal.ZERO);  // Đặt giá trị mặc định cho totalSpent
-        }
+  @Override
+  @Transactional
+  public void deleteCustomer(Long id) {
+    Customer customer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
 
-        return customerRepository.save(customer);
-    }
+    customerRepository.delete(customer);
+  }
 
-    // Cập nhật thông tin khách hàng
-    @Transactional
-    public Customer updateCustomer(Long id, Customer customerDetails) {
-        Customer customer = getCustomerById(id);
+  @Override
+  @Transactional(readOnly = true)
+  public CustomerDTO getCustomerById(Long id) {
+    Customer customer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
 
-        // Kiểm tra nếu email đã thay đổi và đã tồn tại
-        if (!customer.getEmail().equals(customerDetails.getEmail()) &&
-                customerRepository.findByEmail(customerDetails.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
-        }
+    return convertToDTO(customer);
+  }
 
-        // Cập nhật thông tin
-        customer.setName(customerDetails.getName());
-        customer.setEmail(customerDetails.getEmail());
-        customer.setPhone(customerDetails.getPhone());
-        customer.setAddress(customerDetails.getAddress());
-        customer.setStatus(customerDetails.getStatus());
+  @Override
+  @Transactional(readOnly = true)
+  public Page<CustomerDTO> searchCustomers(
+      String searchTerm, Account.Status status, Pageable pageable) {
+    Page<Customer> customerPage = customerRepository.findCustomers(searchTerm, status, pageable);
 
-        return customerRepository.save(customer);
-    }
+    return customerPage.map(this::convertToDTO);
+  }
 
-    // Cập nhật trạng thái khách hàng
-    @Transactional
-    public Customer updateCustomerStatus(Long id, Customer.Status status) {
-        Customer customer = getCustomerById(id);
-        customer.setStatus(status);
-        return customerRepository.save(customer);
-    }
+  @Override
+  @Transactional
+  public CustomerDTO changeCustomerStatus(Long id, Account.Status status) {
+    Customer customer =
+        customerRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng"));
 
-    // Xóa khách hàng
-    @Transactional
-    public void deleteCustomer(Long id) {
-        Customer customer = getCustomerById(id);
-        customerRepository.delete(customer);
-    }
+    customer.setStatus(status);
+    Customer updatedCustomer = customerRepository.save(customer);
 
-    // Cập nhật thông tin đơn hàng cho khách hàng
-    @Transactional
-    public Customer updateOrderInformation(Long customerId, BigDecimal orderAmount) {
-        Customer customer = getCustomerById(customerId);
+    return convertToDTO(updatedCustomer);
+  }
 
-        // Cập nhật số lượng đơn hàng
-        customer.incrementTotalOrders();
+  @Override
+  public boolean isEmailUnique(String email) {
+    return !customerRepository.existsByEmail(email);
+  }
 
-        // Cập nhật tổng chi tiêu và ngày đặt hàng cuối
-        customer.addToTotalSpent(orderAmount);
+  @Override
+  public boolean isUsernameUnique(String username) {
+    return !customerRepository.existsByUsername(username);
+  }
 
-        return customerRepository.save(customer);
-    }
+  @Override
+  public boolean isPhoneUnique(String phone) {
+    return !customerRepository.existsByPhone(phone);
+  }
 
-    // Thống kê khách hàng theo trạng thái
-    public Long countCustomersByStatus(Customer.Status status) {
-        return customerRepository.countByStatus(status);
-    }
+  private CustomerDTO convertToDTO(Customer customer) {
+    CustomerDTO dto = new CustomerDTO();
+    dto.setId(customer.getId());
+    dto.setName(customer.getName());
+    dto.setUsername(customer.getUsername());
+    dto.setEmail(customer.getEmail());
+    dto.setPhone(customer.getPhone());
+    dto.setAddress(customer.getAddress());
+    dto.setStatus(customer.getStatus());
+    dto.setRole(customer.getRole());
+    dto.setTotalOrders(customer.getTotalOrders());
+    dto.setTotalSpent(customer.getTotalSpent());
+    dto.setLastOrderDate(customer.getLastOrderDate());
 
-    // Lấy danh sách khách hàng có tổng chi tiêu lớn hơn minAmount
-    public List<Customer> getTopSpenders(BigDecimal minAmount) {
-        return customerRepository.findByTotalSpentGreaterThan(minAmount);
-    }
+    return dto;
+  }
 }

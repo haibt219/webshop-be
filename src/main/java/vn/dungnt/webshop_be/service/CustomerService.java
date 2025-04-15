@@ -2,33 +2,26 @@ package vn.dungnt.webshop_be.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.dungnt.webshop_be.entity.Customer;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import vn.dungnt.webshop_be.dto.CustomerDTO;
+import vn.dungnt.webshop_be.entity.Account;
 
 public interface CustomerService {
 
-    Page<Customer> searchCustomersWithPagination(String keyword, Customer.Status status, Pageable pageable);
+  CustomerDTO createCustomer(CustomerDTO customerDTO);
 
-    Customer getCustomerById(Long id);
+  CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO);
 
-    Optional<Customer> getCustomerByEmail(String email);
+  void deleteCustomer(Long id);
 
-    List<Customer> getCustomersByStatus(Customer.Status status);
+  CustomerDTO getCustomerById(Long id);
 
-    Customer createCustomer(Customer customer);
+  Page<CustomerDTO> searchCustomers(String searchTerm, Account.Status status, Pageable pageable);
 
-    Customer updateCustomer(Long id, Customer customerDetails);
+  CustomerDTO changeCustomerStatus(Long id, Account.Status status);
 
-    Customer updateCustomerStatus(Long id, Customer.Status status);
+  boolean isEmailUnique(String email);
 
-    void deleteCustomer(Long id);
+  boolean isUsernameUnique(String username);
 
-    Customer updateOrderInformation(Long customerId, BigDecimal orderAmount);
-
-    Long countCustomersByStatus(Customer.Status status);
-
-    List<Customer> getTopSpenders(BigDecimal minAmount);
+  boolean isPhoneUnique(String phone);
 }
