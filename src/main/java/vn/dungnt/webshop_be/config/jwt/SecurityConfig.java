@@ -33,37 +33,34 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    return http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    // Các endpoint công khai (Đăng ký không cần xác thực)
-                    .requestMatchers("/api/auth/register")
-                    .permitAll()
-                    .requestMatchers("/api/auth/login")
-                    .permitAll()
-                    .requestMatchers("/api/auth/refresh-token")
-                    .permitAll()
-                    .requestMatchers("/api/public/**")
+                    // Các endpoint không cần xác thực
+                    .requestMatchers(
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/api/auth/refresh-token",
+                        "/api/categories/**")
                     .permitAll()
 
-                    // Các endpoint admin yêu cầu phải có role ADMIN
+                    // Các endpoint admin
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
 
-                    // Các endpoint của salesman, customer yêu cầu có role thích hợp
+                    // Các endpoint của salesman, customer
                     .requestMatchers("/api/sales/**")
                     .hasAnyRole("ADMIN", "SALESMAN", "CUSTOMER")
 
-                    // Mặc định: yêu cầu xác thực cho mọi request khác
+                    // Mặc định: yêu cầu xác thực
                     .anyRequest()
                     .authenticated())
-        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-    return http.build();
+        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
   }
 
   @Bean
