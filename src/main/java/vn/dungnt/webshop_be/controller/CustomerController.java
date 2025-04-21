@@ -8,8 +8,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import vn.dungnt.webshop_be.dto.CustomerDTO;
+import vn.dungnt.webshop_be.dto.request.CustomerCreateRequest;
+import vn.dungnt.webshop_be.dto.request.CustomerUpdateRequest;
 import vn.dungnt.webshop_be.entity.Account;
 import vn.dungnt.webshop_be.service.CustomerService;
 
@@ -19,14 +20,18 @@ public class CustomerController {
   @Autowired private CustomerService customerService;
 
   @PostMapping
-  public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
-    CustomerDTO createdCustomer = customerService.createCustomer(customerDTO);
+  public ResponseEntity<CustomerDTO> createCustomer(
+      @Valid @RequestBody CustomerCreateRequest createRequest) {
+    if (!createRequest.isPasswordMatching()) {
+      throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+    }
+    CustomerDTO createdCustomer = customerService.createCustomer(createRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<CustomerDTO> updateCustomer(
-      @PathVariable Long id, @Valid @RequestBody CustomerDTO customerDTO) {
+      @PathVariable Long id, @Valid @RequestBody CustomerUpdateRequest customerDTO) {
     CustomerDTO updatedCustomer = customerService.updateCustomer(id, customerDTO);
     return ResponseEntity.ok(updatedCustomer);
   }
