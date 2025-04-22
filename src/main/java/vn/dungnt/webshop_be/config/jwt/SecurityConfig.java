@@ -43,7 +43,7 @@ public class SecurityConfig {
                     // Các endpoint không cần xác thực
                     .requestMatchers(
                         "/api/auth/register",
-                        "/api/auth/login",
+                        "/api/auth/login-admin",
                         "/api/auth/refresh-token",
                         "/api/categories/**")
                     .permitAll()
