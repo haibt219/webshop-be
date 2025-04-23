@@ -45,7 +45,9 @@ public class SecurityConfig {
                         "/api/auth/register",
                         "/api/auth/login-admin",
                         "/api/auth/refresh-token",
-                        "/api/categories/**")
+                        "/api/categories/**",
+                        "/api/products/search",
+                        "api/products/detail/**")
                     .permitAll()
 
                     // Các endpoint admin
