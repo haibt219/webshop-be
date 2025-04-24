@@ -40,9 +40,8 @@ public class ProductDetail {
   @Column(name = "storage")
   private Integer storage;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "storage_type")
-  private StorageType storageType;
+  private String storageType;
 
   @Column(name = "screen_size", precision = 4, scale = 1)
   private BigDecimal screenSize;
@@ -127,11 +126,11 @@ public class ProductDetail {
     this.storage = storage;
   }
 
-  public StorageType getStorageType() {
+  public String getStorageType() {
     return storageType;
   }
 
-  public void setStorageType(StorageType storageType) {
+  public void setStorageType(String storageType) {
     this.storageType = storageType;
   }
 

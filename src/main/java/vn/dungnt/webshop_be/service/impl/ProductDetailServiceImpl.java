@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service;
 import vn.dungnt.webshop_be.dto.ProductDetailDTO;
 import vn.dungnt.webshop_be.dto.request.ProductCreateRequest;
 import vn.dungnt.webshop_be.dto.request.ProductUpdateRequest;
+import vn.dungnt.webshop_be.entity.Category;
 import vn.dungnt.webshop_be.entity.Product;
 import vn.dungnt.webshop_be.entity.ProductDetail;
+import vn.dungnt.webshop_be.entity.ProductDiscount;
 import vn.dungnt.webshop_be.exception.NotFoundException;
+import vn.dungnt.webshop_be.repository.CategoryRepository;
 import vn.dungnt.webshop_be.repository.ProductDetailRepository;
+import vn.dungnt.webshop_be.repository.ProductDiscountRepository;
 import vn.dungnt.webshop_be.repository.ProductRepository;
 import vn.dungnt.webshop_be.service.ProductDetailService;
 
@@ -21,6 +25,8 @@ public class ProductDetailServiceImpl implements ProductDetailService {
 
   @Autowired private ProductRepository productRepository;
   @Autowired private ProductDetailRepository productDetailRepository;
+  @Autowired private CategoryRepository categoryRepository;
+  @Autowired private ProductDiscountRepository discountRepository;
 
   @Override
   public Optional<ProductDetailDTO> findByProductId(Long productId) {
@@ -37,9 +43,17 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     product.setPrice(productCreateRequest.getPrice());
     product.setActive(productCreateRequest.getActive());
 
+    // Thêm category nếu có
+    if (productCreateRequest.getCategoryId() != null) {
+      Optional<Category> categoryOpt =
+          categoryRepository.findById(productCreateRequest.getCategoryId());
+      categoryOpt.ifPresent(product::setCategory);
+    }
+
     // Lưu Product vào database
     Product savedProduct = productRepository.save(product);
 
+    // Tạo ProductDetail
     ProductDetail productDetail = new ProductDetail();
     productDetail.setProduct(savedProduct);
     productDetail.setBrand(productCreateRequest.getBrand());
@@ -61,6 +75,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
 
     // Cập nhật mối quan hệ hai chiều
     savedProduct.setProductDetail(savedProductDetail);
+
     return mapToProductDetailDTO(savedProductDetail);
   }
 
@@ -92,6 +107,13 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     }
     if (productUpdateRequest.getActive() != null) {
       product.setActive(productUpdateRequest.getActive());
+    }
+
+    // Cập nhật category nếu có
+    if (productUpdateRequest.getCategoryId() != null) {
+      Optional<Category> categoryOpt =
+          categoryRepository.findById(productUpdateRequest.getCategoryId());
+      categoryOpt.ifPresent(product::setCategory);
     }
 
     // Lưu cập nhật cho Product
@@ -158,6 +180,12 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     dto.setUpdatedAt(product.getUpdatedAt());
     dto.setActive(product.getActive());
 
+    // Map thông tin category nếu có
+    if (product.getCategory() != null) {
+      dto.setCategoryId(product.getCategory().getId());
+      dto.setCategoryName(product.getCategory().getName());
+    }
+
     // Map thông tin từ ProductDetail
     dto.setBrand(productDetail.getBrand());
     dto.setModel(productDetail.getModel());
@@ -172,6 +200,19 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     dto.setReleaseDate(productDetail.getReleaseDate());
     dto.setColor(productDetail.getColor());
     dto.setWarrantyPeriodMonths(productDetail.getWarrantyPeriodMonths());
+
+    // Map thông tin khuyến mãi
+    ProductDiscount activeDiscount = product.getActiveDiscount();
+    if (activeDiscount != null) {
+      dto.setDiscountId(activeDiscount.getId());
+      dto.setDiscountPrice(activeDiscount.getDiscountPrice());
+      dto.setPromotionDescription(activeDiscount.getPromotionDescription());
+      dto.setPromotionStartDate(activeDiscount.getStartDate());
+      dto.setPromotionEndDate(activeDiscount.getEndDate());
+      dto.setHasActiveDiscount(true);
+    } else {
+      dto.setHasActiveDiscount(false);
+    }
 
     return dto;
   }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.dungnt.webshop_be.dto.ProductDTO;
 import vn.dungnt.webshop_be.entity.Product;
+import vn.dungnt.webshop_be.entity.ProductDiscount;
 import vn.dungnt.webshop_be.exception.NotFoundException;
 import vn.dungnt.webshop_be.repository.ProductRepository;
 import vn.dungnt.webshop_be.service.ProductService;
@@ -51,6 +52,17 @@ public class ProductServiceImpl implements ProductService {
     productDTO.setCreatedAt(product.getCreatedAt());
     productDTO.setUpdatedAt(product.getUpdatedAt());
     productDTO.setActive(product.getActive());
+    if (product.getCategory() != null) {
+      productDTO.setCategoryId(product.getCategory().getId());
+      productDTO.setCategoryName(product.getCategory().getName());
+    }
+    ProductDiscount activeDiscount = product.getActiveDiscount();
+    if (activeDiscount != null) {
+      productDTO.setDiscountPrice(activeDiscount.getDiscountPrice());
+      productDTO.setHasActiveDiscount(true);
+    } else {
+      productDTO.setHasActiveDiscount(false);
+    }
     return productDTO;
   }
 
@@ -68,6 +80,13 @@ public class ProductServiceImpl implements ProductService {
     product.setCreatedAt(productDTO.getCreatedAt());
     product.setUpdatedAt(productDTO.getUpdatedAt());
     product.setActive(productDTO.getActive());
+    if (productDTO.getCreatedAt() != null) {
+      product.setCreatedAt(productDTO.getCreatedAt());
+    }
+    if (productDTO.getUpdatedAt() != null) {
+      product.setUpdatedAt(productDTO.getUpdatedAt());
+    }
+    product.setActive(productDTO.getActive() != null ? productDTO.getActive() : true);
     return product;
   }
 }

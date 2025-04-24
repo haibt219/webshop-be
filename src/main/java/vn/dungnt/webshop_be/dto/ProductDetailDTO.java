@@ -1,19 +1,16 @@
 package vn.dungnt.webshop_be.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import vn.dungnt.webshop_be.entity.StorageType;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDetailDTO implements Serializable {
 
   @Serial private static final long serialVersionUID = 1L;
 
+  // Product
   private Long id;
   private String name;
   private String description;
@@ -21,12 +18,18 @@ public class ProductDetailDTO implements Serializable {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private Boolean active;
+
+  // Category
+  private Long categoryId;
+  private String categoryName;
+
+  // ProductDetail
   private String brand;
   private String model;
   private String processor;
   private Integer ram;
   private Integer storage;
-  private StorageType storageType;
+  private String storageType;
   private BigDecimal screenSize;
   private String screenResolution;
   private Integer batteryCapacity;
@@ -34,6 +37,14 @@ public class ProductDetailDTO implements Serializable {
   private LocalDate releaseDate;
   private String color;
   private Integer warrantyPeriodMonths;
+
+  // Discount
+  private Long discountId;
+  private BigDecimal discountPrice;
+  private String promotionDescription;
+  private LocalDate promotionStartDate;
+  private LocalDate promotionEndDate;
+  private Boolean hasActiveDiscount;
 
   public Long getId() {
     return id;
@@ -131,11 +142,11 @@ public class ProductDetailDTO implements Serializable {
     this.storage = storage;
   }
 
-  public StorageType getStorageType() {
+  public String getStorageType() {
     return storageType;
   }
 
-  public void setStorageType(StorageType storageType) {
+  public void setStorageType(String storageType) {
     this.storageType = storageType;
   }
 
@@ -193,5 +204,69 @@ public class ProductDetailDTO implements Serializable {
 
   public void setWarrantyPeriodMonths(Integer warrantyPeriodMonths) {
     this.warrantyPeriodMonths = warrantyPeriodMonths;
+  }
+
+  public Long getCategoryId() {
+    return categoryId;
+  }
+
+  public void setCategoryId(Long categoryId) {
+    this.categoryId = categoryId;
+  }
+
+  public String getCategoryName() {
+    return categoryName;
+  }
+
+  public void setCategoryName(String categoryName) {
+    this.categoryName = categoryName;
+  }
+
+  public BigDecimal getDiscountPrice() {
+    return discountPrice;
+  }
+
+  public void setDiscountPrice(BigDecimal discountPrice) {
+    this.discountPrice = discountPrice;
+  }
+
+  public String getPromotionDescription() {
+    return promotionDescription;
+  }
+
+  public void setPromotionDescription(String promotionDescription) {
+    this.promotionDescription = promotionDescription;
+  }
+
+  public LocalDate getPromotionStartDate() {
+    return promotionStartDate;
+  }
+
+  public void setPromotionStartDate(LocalDate promotionStartDate) {
+    this.promotionStartDate = promotionStartDate;
+  }
+
+  public LocalDate getPromotionEndDate() {
+    return promotionEndDate;
+  }
+
+  public void setPromotionEndDate(LocalDate promotionEndDate) {
+    this.promotionEndDate = promotionEndDate;
+  }
+
+  public Boolean getHasActiveDiscount() {
+    return hasActiveDiscount;
+  }
+
+  public void setHasActiveDiscount(Boolean hasActiveDiscount) {
+    this.hasActiveDiscount = hasActiveDiscount;
+  }
+
+  public Long getDiscountId() {
+    return discountId;
+  }
+
+  public void setDiscountId(Long discountId) {
+    this.discountId = discountId;
   }
 }

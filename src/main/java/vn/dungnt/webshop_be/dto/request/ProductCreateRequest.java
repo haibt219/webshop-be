@@ -1,11 +1,9 @@
 package vn.dungnt.webshop_be.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import vn.dungnt.webshop_be.entity.StorageType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +14,7 @@ import java.time.LocalDate;
 public class ProductCreateRequest implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
+  // Product
   @NotNull(message = "Tên sản phẩm không được để trống")
   @Size(max = 255, message = "Tên sản phẩm không được vượt quá 255 ký tự")
   private String name;
@@ -30,6 +29,10 @@ public class ProductCreateRequest implements Serializable {
   @NotNull(message = "Trạng thái sản phẩm không được để trống")
   private Boolean active;
 
+  // Category
+  private Long categoryId;
+
+  // ProductDetail
   private String brand;
   private String model;
   private String processor;
@@ -41,7 +44,7 @@ public class ProductCreateRequest implements Serializable {
   private Integer storage;
 
   @NotNull(message = "Loại lưu trữ không được để trống")
-  private StorageType storageType;
+  private String storageType;
 
   @Positive(message = "Kích thước màn hình phải lớn hơn 0")
   private BigDecimal screenSize;
@@ -130,11 +133,11 @@ public class ProductCreateRequest implements Serializable {
     this.storage = storage;
   }
 
-  public StorageType getStorageType() {
+  public String getStorageType() {
     return storageType;
   }
 
-  public void setStorageType(StorageType storageType) {
+  public void setStorageType(String storageType) {
     this.storageType = storageType;
   }
 
@@ -192,5 +195,13 @@ public class ProductCreateRequest implements Serializable {
 
   public void setWarrantyPeriodMonths(Integer warrantyPeriodMonths) {
     this.warrantyPeriodMonths = warrantyPeriodMonths;
+  }
+
+  public Long getCategoryId() {
+    return categoryId;
+  }
+
+  public void setCategoryId(Long categoryId) {
+    this.categoryId = categoryId;
   }
 }

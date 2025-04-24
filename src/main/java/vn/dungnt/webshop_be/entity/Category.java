@@ -8,7 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -30,6 +34,9 @@ public class Category {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id", insertable = false, updatable = false)
   private Category parent;
+
+  @OneToMany(mappedBy = "category")
+  private List<Product> products = new ArrayList<>();
 
   public Category() {}
 
@@ -79,5 +86,23 @@ public class Category {
 
   public void setParent(Category parent) {
     this.parent = parent;
+  }
+
+  public List<Product> getProducts() {
+    return products;
+  }
+
+  public void setProducts(List<Product> products) {
+    this.products = products;
+  }
+
+  public void addProduct(Product product) {
+    products.add(product);
+    product.setCategory(this);
+  }
+
+  public void removeProduct(Product product) {
+    products.remove(product);
+    product.setCategory(null);
   }
 }

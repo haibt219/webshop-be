@@ -7,10 +7,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDTO implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
+  // Product
   private Long id;
 
   private String name;
@@ -25,24 +25,13 @@ public class ProductDTO implements Serializable {
 
   private Boolean active = true;
 
-  public ProductDTO() {}
+  // Category related fields
+  private Long categoryId;
+  private String categoryName;
 
-  public ProductDTO(
-      Long id,
-      String name,
-      String description,
-      BigDecimal price,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt,
-      Boolean active) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
-    this.price = price;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.active = active;
-  }
+  // Discount Product
+  private BigDecimal discountPrice;
+  private Boolean hasActiveDiscount;
 
   public Long getId() {
     return id;
@@ -98,5 +87,37 @@ public class ProductDTO implements Serializable {
 
   public void setActive(Boolean active) {
     this.active = active;
+  }
+
+  public Long getCategoryId() {
+    return categoryId;
+  }
+
+  public void setCategoryId(Long categoryId) {
+    this.categoryId = categoryId;
+  }
+
+  public String getCategoryName() {
+    return categoryName;
+  }
+
+  public void setCategoryName(String categoryName) {
+    this.categoryName = categoryName;
+  }
+
+  public BigDecimal getDiscountPrice() {
+    return discountPrice;
+  }
+
+  public void setDiscountPrice(BigDecimal discountPrice) {
+    this.discountPrice = discountPrice;
+  }
+
+  public Boolean getHasActiveDiscount() {
+    return hasActiveDiscount;
+  }
+
+  public void setHasActiveDiscount(Boolean hasActiveDiscount) {
+    this.hasActiveDiscount = hasActiveDiscount;
   }
 }

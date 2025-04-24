@@ -1,7 +1,6 @@
 package vn.dungnt.webshop_be.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import vn.dungnt.webshop_be.entity.StorageType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,16 +11,22 @@ import java.time.LocalDate;
 public class ProductUpdateRequest implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
+  // Product
   private String name;
   private String description;
   private BigDecimal price;
   private Boolean active;
+
+  // Category
+  private Long categoryId;
+
+  // ProductDetail
   private String brand;
   private String model;
   private String processor;
   private Integer ram;
   private Integer storage;
-  private StorageType storageType;
+  private String storageType;
   private BigDecimal screenSize;
   private String screenResolution;
   private Integer batteryCapacity;
@@ -102,11 +107,11 @@ public class ProductUpdateRequest implements Serializable {
     this.storage = storage;
   }
 
-  public StorageType getStorageType() {
+  public String getStorageType() {
     return storageType;
   }
 
-  public void setStorageType(StorageType storageType) {
+  public void setStorageType(String storageType) {
     this.storageType = storageType;
   }
 
@@ -164,5 +169,13 @@ public class ProductUpdateRequest implements Serializable {
 
   public void setWarrantyPeriodMonths(Integer warrantyPeriodMonths) {
     this.warrantyPeriodMonths = warrantyPeriodMonths;
+  }
+
+  public Long getCategoryId() {
+    return categoryId;
+  }
+
+  public void setCategoryId(Long categoryId) {
+    this.categoryId = categoryId;
   }
 }
