@@ -1,6 +1,9 @@
 package vn.dungnt.webshop_be.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,9 +15,21 @@ public class ProductUpdateRequest implements Serializable {
   @Serial private static final long serialVersionUID = 1L;
 
   // Product
+  @NotNull(message = "Tên sản phẩm không được để trống")
+  @Size(max = 255, message = "Tên sản phẩm không được vượt quá 255 ký tự")
   private String name;
+
+  @Size(max = 1000, message = "Độ dài mô tả không được vượt quá 1000 ký tự")
   private String description;
+
+  @Size(max = 1000, message = "Độ dài hình ảnh không được vượt quá 1000 ký tự")
+  private String image;
+
+  @NotNull(message = "Giá sản phẩm không được để trống")
+  @Positive(message = "Giá sản phẩm phải lớn hơn 0")
   private BigDecimal price;
+
+  @NotNull(message = "Trạng thái sản phẩm không được để trống")
   private Boolean active;
 
   // Category
@@ -24,15 +39,29 @@ public class ProductUpdateRequest implements Serializable {
   private String brand;
   private String model;
   private String processor;
+
+  @Positive(message = "RAM phải lớn hơn 0")
   private Integer ram;
+
+  @Positive(message = "Dung lượng lưu trữ phải lớn hơn 0")
   private Integer storage;
+
+  @NotNull(message = "Loại lưu trữ không được để trống")
   private String storageType;
+
+  @Positive(message = "Kích thước màn hình phải lớn hơn 0")
   private BigDecimal screenSize;
+
   private String screenResolution;
+
+  @Positive(message = "Dung lượng pin phải lớn hơn 0")
   private Integer batteryCapacity;
+
   private String operatingSystem;
   private LocalDate releaseDate;
   private String color;
+
+  @Positive(message = "Thời gian bảo hành phải lớn hơn 0")
   private Integer warrantyPeriodMonths;
 
   public String getName() {
@@ -49,6 +78,14 @@ public class ProductUpdateRequest implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public void setImage(String image) {
+    this.image = image;
   }
 
   public BigDecimal getPrice() {

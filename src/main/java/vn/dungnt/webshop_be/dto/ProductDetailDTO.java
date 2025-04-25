@@ -14,6 +14,7 @@ public class ProductDetailDTO implements Serializable {
   private Long id;
   private String name;
   private String description;
+  private String image;
   private BigDecimal price;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
@@ -68,6 +69,14 @@ public class ProductDetailDTO implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public void setImage(String image) {
+    this.image = image;
   }
 
   public BigDecimal getPrice() {

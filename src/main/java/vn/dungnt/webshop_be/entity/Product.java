@@ -34,6 +34,9 @@ public class Product {
   @Column(length = 1000)
   private String description;
 
+  @Column(length = 500)
+  private String image;
+
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal price;
 
@@ -58,9 +61,10 @@ public class Product {
 
   public Product() {}
 
-  public Product(String name, String description, BigDecimal price) {
+  public Product(String name, String description, String image, BigDecimal price) {
     this.name = name;
     this.description = description;
+    this.image = image;
     this.price = price;
     this.createdAt = LocalDateTime.now();
   }
@@ -87,6 +91,14 @@ public class Product {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public void setImage(String image) {
+    this.image = image;
   }
 
   public BigDecimal getPrice() {

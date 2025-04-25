@@ -19,8 +19,11 @@ public class ProductCreateRequest implements Serializable {
   @Size(max = 255, message = "Tên sản phẩm không được vượt quá 255 ký tự")
   private String name;
 
-  @Size(max = 1000, message = "Mô tả không được vượt quá 1000 ký tự")
+  @Size(max = 1000, message = "Độ dài mô tả không được vượt quá 1000 ký tự")
   private String description;
+
+  @Size(max = 1000, message = "Độ dài hình ảnh không được vượt quá 1000 ký tự")
+  private String image;
 
   @NotNull(message = "Giá sản phẩm không được để trống")
   @Positive(message = "Giá sản phẩm phải lớn hơn 0")
@@ -75,6 +78,14 @@ public class ProductCreateRequest implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public void setImage(String image) {
+    this.image = image;
   }
 
   public BigDecimal getPrice() {

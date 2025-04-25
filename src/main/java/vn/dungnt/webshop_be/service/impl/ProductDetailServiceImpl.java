@@ -42,6 +42,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     product.setDescription(productCreateRequest.getDescription());
     product.setPrice(productCreateRequest.getPrice());
     product.setActive(productCreateRequest.getActive());
+    product.setImage(productCreateRequest.getImage());
 
     // Thêm category nếu có
     if (productCreateRequest.getCategoryId() != null) {
@@ -101,6 +102,9 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     }
     if (productUpdateRequest.getDescription() != null) {
       product.setDescription(productUpdateRequest.getDescription());
+    }
+    if (productUpdateRequest.getImage() != null) {
+      product.setImage(productUpdateRequest.getImage());
     }
     if (productUpdateRequest.getPrice() != null) {
       product.setPrice(productUpdateRequest.getPrice());
@@ -175,6 +179,7 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     dto.setId(product.getId());
     dto.setName(product.getName());
     dto.setDescription(product.getDescription());
+    dto.setImage(product.getImage());
     dto.setPrice(product.getPrice());
     dto.setCreatedAt(product.getCreatedAt());
     dto.setUpdatedAt(product.getUpdatedAt());
