@@ -23,9 +23,14 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public Page<ProductDTO> searchProducts(
-      String name, Boolean active, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+      String name,
+      Boolean active,
+      BigDecimal minPrice,
+      BigDecimal maxPrice,
+      Long categoryId,
+      Pageable pageable) {
     Page<Product> productPage =
-        productRepository.searchProducts(name, active, minPrice, maxPrice, pageable);
+        productRepository.searchProducts(name, active, minPrice, maxPrice, categoryId, pageable);
     return productPage.map(this::mapToProductDTO);
   }
 

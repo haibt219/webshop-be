@@ -9,7 +9,12 @@ import java.util.Optional;
 
 public interface ProductService {
   Page<ProductDTO> searchProducts(
-      String name, Boolean active, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+      String name,
+      Boolean active,
+      BigDecimal minPrice,
+      BigDecimal maxPrice,
+      Long categoryId,
+      Pageable pageable);
 
   void deleteProduct(Long id);
 

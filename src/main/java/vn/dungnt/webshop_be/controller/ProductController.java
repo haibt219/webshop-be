@@ -39,6 +39,7 @@ public class ProductController {
       @RequestParam(required = false) Boolean active,
       @RequestParam(required = false) BigDecimal minPrice,
       @RequestParam(required = false) BigDecimal maxPrice,
+      @RequestParam(required = false) Long categoryId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -48,7 +49,7 @@ public class ProductController {
     PageRequest pageRequest = PageRequest.of(page, size, sort);
 
     Page<ProductDTO> products =
-        productService.searchProducts(name, active, minPrice, maxPrice, pageRequest);
+        productService.searchProducts(name, active, minPrice, maxPrice, categoryId, pageRequest);
 
     return ResponseEntity.ok(products);
   }

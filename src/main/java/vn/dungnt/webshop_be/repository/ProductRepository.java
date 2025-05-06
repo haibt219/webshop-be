@@ -29,12 +29,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           + "WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) "
           + "AND (:active IS NULL OR p.active = :active) "
           + "AND (:minPrice IS NULL OR p.price >= :minPrice) "
-          + "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
+          + "AND (:maxPrice IS NULL OR p.price <= :maxPrice)"
+          + "AND (:categoryId IS NULL OR p.category.id = :categoryId)")
   Page<Product> searchProducts(
       @Param("name") String name,
       @Param("active") Boolean active,
       @Param("minPrice") BigDecimal minPrice,
       @Param("maxPrice") BigDecimal maxPrice,
+      @Param("categoryId") Long categoryId,
       Pageable pageable);
 
   /**
