@@ -3,6 +3,8 @@ package vn.dungnt.webshop_be.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import vn.dungnt.webshop_be.dto.OrderDTO;
+import vn.dungnt.webshop_be.dto.request.OrderCreateRequest;
+import vn.dungnt.webshop_be.dto.request.OrderUpdateRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,10 +15,10 @@ public interface OrderService {
   OrderDTO getOrderById(Long orderId);
 
   // Tạo đơn hàng mới
-  OrderDTO createOrder(OrderDTO orderDTO);
+  OrderDTO createOrder(OrderCreateRequest createRequest);
 
   // Cập nhật đơn hàng
-  OrderDTO updateOrder(Long orderId, OrderDTO orderDTO);
+  OrderDTO updateOrder(Long orderId, OrderUpdateRequest requestDTO);
 
   // Xóa đơn hàng
   void deleteOrder(Long orderId);

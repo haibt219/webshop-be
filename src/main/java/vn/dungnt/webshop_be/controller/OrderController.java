@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.dungnt.webshop_be.dto.OrderDTO;
+import vn.dungnt.webshop_be.dto.request.OrderCreateRequest;
+import vn.dungnt.webshop_be.dto.request.OrderUpdateRequest;
 import vn.dungnt.webshop_be.service.OrderService;
 
 import java.time.LocalDateTime;
@@ -76,15 +78,15 @@ public class OrderController {
   }
 
   @PostMapping
-  public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) {
-    OrderDTO createdOrder = orderService.createOrder(orderDTO);
+  public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderCreateRequest createRequest) {
+    OrderDTO createdOrder = orderService.createOrder(createRequest);
     return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<OrderDTO> updateOrder(
-      @PathVariable Long id, @RequestBody OrderDTO orderDTO) {
-    OrderDTO updatedOrder = orderService.updateOrder(id, orderDTO);
+      @PathVariable Long id, @RequestBody OrderUpdateRequest requestDTO) {
+    OrderDTO updatedOrder = orderService.updateOrder(id, requestDTO);
     return ResponseEntity.ok(updatedOrder);
   }
 

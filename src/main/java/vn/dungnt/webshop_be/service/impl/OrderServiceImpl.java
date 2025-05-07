@@ -7,24 +7,34 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.dungnt.webshop_be.dto.OrderDTO;
+import vn.dungnt.webshop_be.dto.request.OrderCreateRequest;
+import vn.dungnt.webshop_be.dto.request.OrderItemRequest;
+import vn.dungnt.webshop_be.dto.request.OrderUpdateRequest;
 import vn.dungnt.webshop_be.entity.Order;
+import vn.dungnt.webshop_be.entity.OrderDetail;
+import vn.dungnt.webshop_be.entity.Product;
+import vn.dungnt.webshop_be.entity.ProductDiscount;
 import vn.dungnt.webshop_be.exception.NotFoundException;
 import vn.dungnt.webshop_be.exception.ResourceNotFoundException;
 import vn.dungnt.webshop_be.repository.OrderRepository;
+import vn.dungnt.webshop_be.repository.ProductRepository;
 import vn.dungnt.webshop_be.service.OrderService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
   @Autowired private OrderRepository orderRepository;
+  @Autowired private ProductRepository productRepository;
 
   @Override
   public OrderDTO getOrderById(Long orderId) {
@@ -38,34 +48,181 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public OrderDTO createOrder(OrderDTO orderDTO) {
-    Order order = orderDTO.toEntity();
+  public OrderDTO createOrder(OrderCreateRequest requestDTO) {
+    // Tạo đối tượng Order mới
+    Order order = new Order();
+    order.setCustomerName(requestDTO.getCustomerName());
+    order.setCustomerEmail(requestDTO.getCustomerEmail());
+    order.setCustomerPhone(requestDTO.getCustomerPhone());
+    order.setShippingAddress(requestDTO.getShippingAddress());
+    order.setStatus(requestDTO.getStatus());
+    order.setPaymentMethod(requestDTO.getPaymentMethod());
+    order.setPaymentStatus(requestDTO.getPaymentStatus());
+    order.setShippingMethod(requestDTO.getShippingMethod());
+    order.setShippingCost(requestDTO.getShippingCost());
+    order.setNotes(requestDTO.getNotes());
+    order.setCustomerId(requestDTO.getCustomerId());
+    order.setTotalAmount(BigDecimal.ZERO); // Tạm thời đặt tổng tiền là 0, sẽ cập nhật sau
+
+    // Lấy thông tin sản phẩm từ database và tạo OrderDetail cho mỗi sản phẩm
+    for (OrderItemRequest item : requestDTO.getProducts()) {
+      Long productId = item.getProductId();
+      Integer quantity = item.getQuantity();
+
+      // Lấy thông tin sản phẩm từ database
+      Product product =
+          productRepository
+              .findById(productId)
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException("Sản phẩm không tồn tại với ID: " + productId));
+
+      // Tạo OrderDetail
+      OrderDetail orderDetail = new OrderDetail();
+      // Không đặt ID, để JPA tự động tạo
+      // orderDetail.setId(null);
+      orderDetail.setProductId(product.getId());
+      orderDetail.setProductName(product.getName());
+
+      // Đảm bảo productCode không null
+      String productCode = "P" + product.getId();
+      orderDetail.setProductCode(productCode);
+
+      orderDetail.setProductImage(product.getImage());
+      orderDetail.setQuantity(quantity);
+
+      // Sử dụng giá hiện tại của sản phẩm (có thể là giá khuyến mãi)
+      BigDecimal currentPrice = product.getCurrentPrice();
+      if (currentPrice == null) {
+        currentPrice = product.getPrice(); // Sử dụng giá gốc nếu không có giá hiện tại
+      }
+      orderDetail.setPrice(currentPrice);
+
+      // Tính toán discount nếu có
+      ProductDiscount activeDiscount = product.getActiveDiscount();
+      if (activeDiscount != null) {
+        BigDecimal originalPrice = product.getPrice();
+        BigDecimal discountPrice = product.getCurrentPrice();
+        if (originalPrice != null && discountPrice != null) {
+          BigDecimal discountAmount = originalPrice.subtract(discountPrice);
+
+          // Nếu có giảm giá, lưu lại giá trị giảm giá cho item này
+          if (discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            // Tổng giảm giá cho số lượng sản phẩm này
+            orderDetail.setDiscount(discountAmount.multiply(new BigDecimal(quantity)));
+          } else {
+            orderDetail.setDiscount(BigDecimal.ZERO);
+          }
+        } else {
+          orderDetail.setDiscount(BigDecimal.ZERO);
+        }
+      } else {
+        orderDetail.setDiscount(BigDecimal.ZERO);
+      }
+
+      // Thêm OrderDetail vào Order thông qua phương thức addItem
+      order.addItem(orderDetail);
+    }
 
     // Tính toán lại tổng tiền để đảm bảo tính chính xác
     order.calculateTotalAmount();
 
+    // Lưu Order vào database
     Order savedOrder = orderRepository.save(order);
+
+    // Trả về OrderDTO
     return OrderDTO.fromEntity(savedOrder);
   }
 
   @Override
   @Transactional
-  public OrderDTO updateOrder(Long orderId, OrderDTO orderDTO) {
+  public OrderDTO updateOrder(Long orderId, OrderUpdateRequest requestDTO) {
+    // Tìm đơn hàng hiện tại
     Order existingOrder =
         orderRepository
             .findById(orderId)
-            .orElseThrow(
-                () -> new ResourceNotFoundException("Đơn hàng không tồn tại với ID: " + orderId));
+            .orElseThrow(() -> new NotFoundException("Đơn hàng không tồn tại với ID: " + orderId));
 
-    // Cập nhật thông tin đơn hàng
-    Order updatedOrder = orderDTO.toEntity();
-    updatedOrder.setOrderId(existingOrder.getOrderId());
-    updatedOrder.setCreatedAt(existingOrder.getCreatedAt());
+    // Cập nhật thông tin cơ bản
+    existingOrder.setCustomerName(requestDTO.getCustomerName());
+    existingOrder.setCustomerEmail(requestDTO.getCustomerEmail());
+    existingOrder.setCustomerPhone(requestDTO.getCustomerPhone());
+    existingOrder.setShippingAddress(requestDTO.getShippingAddress());
+    existingOrder.setStatus(requestDTO.getStatus());
+    existingOrder.setPaymentMethod(requestDTO.getPaymentMethod());
+    existingOrder.setPaymentStatus(requestDTO.getPaymentStatus());
+    existingOrder.setShippingMethod(requestDTO.getShippingMethod());
+    existingOrder.setShippingCost(requestDTO.getShippingCost());
+    existingOrder.setNotes(requestDTO.getNotes());
+    existingOrder.setCustomerId(requestDTO.getCustomerId());
+
+    // Xóa tất cả các item hiện tại
+    existingOrder.getItems().clear();
+
+    // Thêm các item mới
+    for (OrderItemRequest item : requestDTO.getProducts()) {
+      Long productId = item.getProductId();
+      Integer quantity = item.getQuantity();
+
+      // Lấy thông tin sản phẩm từ database
+      Product product =
+          productRepository
+              .findById(productId)
+              .orElseThrow(
+                  () -> new NotFoundException("Sản phẩm không tồn tại với ID: " + productId));
+
+      // Tạo OrderDetail
+      OrderDetail orderDetail = new OrderDetail();
+      orderDetail.setProductId(product.getId());
+      orderDetail.setProductName(product.getName());
+
+      // Đảm bảo productCode không null
+      String productCode = "P" + product.getId();
+      orderDetail.setProductCode(productCode);
+
+      orderDetail.setProductImage(product.getImage());
+      orderDetail.setQuantity(quantity);
+
+      // Sử dụng giá hiện tại của sản phẩm (có thể là giá khuyến mãi)
+      BigDecimal currentPrice = product.getCurrentPrice();
+      if (currentPrice == null) {
+        currentPrice = product.getPrice(); // Sử dụng giá gốc nếu không có giá hiện tại
+      }
+      orderDetail.setPrice(currentPrice);
+
+      // Tính toán discount nếu có
+      ProductDiscount activeDiscount = product.getActiveDiscount();
+      if (activeDiscount != null) {
+        BigDecimal originalPrice = product.getPrice();
+        BigDecimal discountPrice = product.getCurrentPrice();
+        if (originalPrice != null && discountPrice != null) {
+          BigDecimal discountAmount = originalPrice.subtract(discountPrice);
+
+          // Nếu có giảm giá, lưu lại giá trị giảm giá cho item này
+          if (discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            // Tổng giảm giá cho số lượng sản phẩm này
+            orderDetail.setDiscount(discountAmount.multiply(new BigDecimal(quantity)));
+          } else {
+            orderDetail.setDiscount(BigDecimal.ZERO);
+          }
+        } else {
+          orderDetail.setDiscount(BigDecimal.ZERO);
+        }
+      } else {
+        orderDetail.setDiscount(BigDecimal.ZERO);
+      }
+
+      // Thêm OrderDetail vào Order
+      existingOrder.addItem(orderDetail);
+    }
 
     // Tính toán lại tổng tiền để đảm bảo tính chính xác
-    updatedOrder.calculateTotalAmount();
+    existingOrder.calculateTotalAmount();
 
-    Order savedOrder = orderRepository.save(updatedOrder);
+    // Lưu Order cập nhật vào database
+    Order savedOrder = orderRepository.save(existingOrder);
+
+    // Trả về OrderDTO
     return OrderDTO.fromEntity(savedOrder);
   }
 
