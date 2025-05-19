@@ -10,6 +10,9 @@ import vn.dungnt.webshop_be.exception.ResourceNotFoundException;
 import vn.dungnt.webshop_be.repository.CategoryRepository;
 import vn.dungnt.webshop_be.service.CategoryService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -80,6 +83,22 @@ public class CategoryServiceImpl implements CategoryService {
   public Page<CategoryDTO> getSubcategoriesByParentId(Long parentId, Pageable pageable) {
     Page<Category> subcategoriesPage = categoryRepository.findByParentId(parentId, pageable);
     return subcategoriesPage.map(this::convertToDTO);
+  }
+
+  @Override
+  public List<Long> getAllCategoryIdsIncludingChildren(Long categoryId) {
+    List<Long> allIds = new ArrayList<>();
+    allIds.add(categoryId);
+
+    // Lấy tất cả danh mục con trực tiếp
+    List<Category> directChildren = categoryRepository.findByParentId(categoryId);
+
+    // Đệ quy lấy tất cả danh mục con của các danh mục con
+    for (Category child : directChildren) {
+      allIds.addAll(getAllCategoryIdsIncludingChildren(child.getId()));
+    }
+
+    return allIds;
   }
 
   private CategoryDTO convertToDTO(Category category) {

@@ -71,6 +71,17 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     productDetail.setColor(productCreateRequest.getColor());
     productDetail.setWarrantyPeriodMonths(productCreateRequest.getWarrantyPeriodMonths());
 
+    if (productCreateRequest.getDiscountPrice() != null) {
+      ProductDiscount productDiscount = new ProductDiscount();
+      productDiscount.setProduct(savedProduct);
+      productDiscount.setDiscountPrice(productCreateRequest.getDiscountPrice());
+      productDiscount.setPromotionDescription(productCreateRequest.getPromotionDescription());
+      productDiscount.setStartDate(productCreateRequest.getPromotionStartDate());
+      productDiscount.setEndDate(productCreateRequest.getPromotionEndDate());
+
+      discountRepository.save(productDiscount);
+    }
+
     // Lưu ProductDetail vào database
     ProductDetail savedProductDetail = productDetailRepository.save(productDetail);
 
@@ -166,6 +177,17 @@ public class ProductDetailServiceImpl implements ProductDetailService {
 
     // Lưu cập nhật cho ProductDetail
     ProductDetail updatedProductDetail = productDetailRepository.save(productDetail);
+
+    if (productUpdateRequest.getDiscountPrice() != null) {
+      ProductDiscount productDiscount = new ProductDiscount();
+      productDiscount.setProduct(product);
+      productDiscount.setDiscountPrice(productUpdateRequest.getDiscountPrice());
+      productDiscount.setPromotionDescription(productUpdateRequest.getPromotionDescription());
+      productDiscount.setStartDate(productUpdateRequest.getPromotionStartDate());
+      productDiscount.setEndDate(productUpdateRequest.getPromotionEndDate());
+
+      discountRepository.save(productDiscount);
+    }
 
     // Trả về DTO từ entities đã cập nhật
     return mapToProductDetailDTO(updatedProductDetail);

@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import vn.dungnt.webshop_be.dto.CategoryDTO;
 import vn.dungnt.webshop_be.service.CategoryService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
@@ -113,5 +115,15 @@ public class CategoryController {
         categoryService.getSubcategoriesByParentId(parentId, pageable);
 
     return ResponseEntity.ok(subcategories);
+  }
+
+  @GetMapping("/{id}/all-category-ids")
+  public ResponseEntity<List<Long>> getAllCategoryIdsIncludingChildren(@PathVariable Long id) {
+    try {
+      List<Long> allIds = categoryService.getAllCategoryIdsIncludingChildren(id);
+      return ResponseEntity.ok(allIds);
+    } catch (Exception e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 }

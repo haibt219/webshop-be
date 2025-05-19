@@ -10,16 +10,20 @@ import vn.dungnt.webshop_be.entity.Product;
 import vn.dungnt.webshop_be.entity.ProductDiscount;
 import vn.dungnt.webshop_be.exception.NotFoundException;
 import vn.dungnt.webshop_be.repository.ProductRepository;
+import vn.dungnt.webshop_be.service.CategoryService;
 import vn.dungnt.webshop_be.service.ProductService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
 
   @Autowired private ProductRepository productRepository;
+  @Autowired private CategoryService categoryService;
 
   @Override
   public Page<ProductDTO> searchProducts(
@@ -29,8 +33,18 @@ public class ProductServiceImpl implements ProductService {
       BigDecimal maxPrice,
       Long categoryId,
       Pageable pageable) {
+
+    List<Long> categoryIds = null;
+    if (categoryId != null) {
+      categoryIds = categoryService.getAllCategoryIdsIncludingChildren(categoryId);
+      if (categoryIds != null && categoryIds.isEmpty()) {
+        categoryIds = null;
+      }
+    }
+
     Page<Product> productPage =
-        productRepository.searchProducts(name, active, minPrice, maxPrice, categoryId, pageable);
+        productRepository.searchProducts(name, active, minPrice, maxPrice, categoryIds, pageable);
+
     return productPage.map(this::mapToProductDTO);
   }
 

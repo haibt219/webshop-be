@@ -12,36 +12,13 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-  /**
-   * Tìm kiếm danh mục theo tên với phân trang
-   *
-   * @param name Tên danh mục cần tìm (không phân biệt hoa thường)
-   * @param pageable Thông tin phân trang
-   * @return Trang chứa các đối tượng Category phù hợp
-   */
-  Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
+  List<Category> findByParentId(Long parentId);
 
-  /**
-   * Tìm tất cả danh mục cha (các danh mục không có parentId) với phân trang
-   *
-   * @param pageable Thông tin phân trang
-   * @return Trang chứa các đối tượng Category
-   */
-  Page<Category> findByParentIdIsNull(Pageable pageable);
-
-  /**
-   * Tìm tất cả danh mục con của một danh mục cha với phân trang
-   *
-   * @param parentId ID của danh mục cha
-   * @param pageable Thông tin phân trang
-   * @return Trang chứa các đối tượng Category
-   */
   Page<Category> findByParentId(Long parentId, Pageable pageable);
 
-  boolean existsByNameIgnoreCase(String name);
+  Page<Category> findByParentIdIsNull(Pageable pageable);
 
-  boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+  Page<Category> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-  @Query("SELECT COUNT(c) FROM Category c WHERE c.parentId = ?1")
-  int countChildCategories(Long parentId);
+  boolean existsByParentId(Long parentId);
 }

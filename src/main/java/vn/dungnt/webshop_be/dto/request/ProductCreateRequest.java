@@ -29,6 +29,9 @@ public class ProductCreateRequest implements Serializable {
   @Positive(message = "Giá sản phẩm phải lớn hơn 0")
   private BigDecimal price;
 
+  @Positive(message = "Giá sản phẩm phải lớn hơn 0")
+  private BigDecimal discountPrice;
+
   @NotNull(message = "Trạng thái sản phẩm không được để trống")
   private Boolean active;
 
@@ -63,6 +66,12 @@ public class ProductCreateRequest implements Serializable {
 
   @Positive(message = "Thời gian bảo hành phải lớn hơn 0")
   private Integer warrantyPeriodMonths;
+
+  private LocalDate promotionStartDate;
+
+  private LocalDate promotionEndDate;
+
+  private String promotionDescription;
 
   public String getName() {
     return name;
@@ -214,5 +223,37 @@ public class ProductCreateRequest implements Serializable {
 
   public void setCategoryId(Long categoryId) {
     this.categoryId = categoryId;
+  }
+
+  public BigDecimal getDiscountPrice() {
+    return discountPrice;
+  }
+
+  public void setDiscountPrice(BigDecimal discountPrice) {
+    this.discountPrice = discountPrice;
+  }
+
+  public LocalDate getPromotionStartDate() {
+    return promotionStartDate;
+  }
+
+  public void setPromotionStartDate(LocalDate promotionStartDate) {
+    this.promotionStartDate = promotionStartDate;
+  }
+
+  public LocalDate getPromotionEndDate() {
+    return promotionEndDate;
+  }
+
+  public void setPromotionEndDate(LocalDate promotionEndDate) {
+    this.promotionEndDate = promotionEndDate;
+  }
+
+  public String getPromotionDescription() {
+    return promotionDescription;
+  }
+
+  public void setPromotionDescription(String promotionDescription) {
+    this.promotionDescription = promotionDescription;
   }
 }
