@@ -6,6 +6,7 @@ import vn.dungnt.webshop_be.dto.CustomerDTO;
 import vn.dungnt.webshop_be.dto.request.CustomerCreateRequest;
 import vn.dungnt.webshop_be.dto.request.CustomerUpdateRequest;
 import vn.dungnt.webshop_be.entity.Account;
+import vn.dungnt.webshop_be.entity.Customer;
 
 public interface CustomerService {
 
@@ -26,4 +27,6 @@ public interface CustomerService {
   boolean isUsernameUnique(String username);
 
   boolean isPhoneUnique(String phone);
+
+  CustomerDTO convertToDTO(Customer customer);
 }

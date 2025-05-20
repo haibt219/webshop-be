@@ -141,7 +141,8 @@ public class CustomerServiceImpl implements CustomerService {
     return !customerRepository.existsByPhone(phone);
   }
 
-  private CustomerDTO convertToDTO(Customer customer) {
+  @Override
+  public CustomerDTO convertToDTO(Customer customer) {
     CustomerDTO dto = new CustomerDTO();
     dto.setId(customer.getId());
     dto.setName(customer.getName());

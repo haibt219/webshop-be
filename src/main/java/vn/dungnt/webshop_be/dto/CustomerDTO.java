@@ -27,10 +27,6 @@ public class CustomerDTO implements Serializable {
   @Size(min = 4, max = 50, message = "Tên đăng nhập phải từ 4 đến 50 ký tự")
   private String username;
 
-  @NotBlank(message = "Mật khẩu không được để trống")
-  @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
-  private String password;
-
   @NotBlank(message = "Email không được để trống")
   @Email(message = "Email không hợp lệ")
   private String email;
@@ -49,12 +45,6 @@ public class CustomerDTO implements Serializable {
   private Integer totalOrders;
   private BigDecimal totalSpent;
   private LocalDateTime lastOrderDate;
-
-  private String confirmPassword;
-
-  public boolean isPasswordMatching() {
-    return password != null && password.equals(confirmPassword);
-  }
 
   public boolean isVip() {
     return totalOrders != null
@@ -82,7 +72,6 @@ public class CustomerDTO implements Serializable {
     this.id = id;
     this.name = name;
     this.username = username;
-    this.password = password;
     this.email = email;
     this.phone = phone;
     this.address = address;
@@ -91,7 +80,6 @@ public class CustomerDTO implements Serializable {
     this.totalOrders = totalOrders;
     this.totalSpent = totalSpent;
     this.lastOrderDate = lastOrderDate;
-    this.confirmPassword = confirmPassword;
   }
 
   public Long getId() {
@@ -116,14 +104,6 @@ public class CustomerDTO implements Serializable {
 
   public void setUsername(String username) {
     this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 
   public String getEmail() {
@@ -188,13 +168,5 @@ public class CustomerDTO implements Serializable {
 
   public void setLastOrderDate(LocalDateTime lastOrderDate) {
     this.lastOrderDate = lastOrderDate;
-  }
-
-  public String getConfirmPassword() {
-    return confirmPassword;
-  }
-
-  public void setConfirmPassword(String confirmPassword) {
-    this.confirmPassword = confirmPassword;
   }
 }

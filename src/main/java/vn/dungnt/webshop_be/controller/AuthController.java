@@ -9,17 +9,23 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import vn.dungnt.webshop_be.config.jwt.JwtTokenProvider;
+import vn.dungnt.webshop_be.dto.CustomerDTO;
 import vn.dungnt.webshop_be.dto.request.LoginRequest;
 import vn.dungnt.webshop_be.dto.request.RegisterRequest;
 import vn.dungnt.webshop_be.dto.response.ErrorResponse;
 import vn.dungnt.webshop_be.dto.response.LoginResponse;
 import vn.dungnt.webshop_be.dto.response.MessageResponse;
 import vn.dungnt.webshop_be.dto.response.RefreshTokenResponse;
+import vn.dungnt.webshop_be.entity.Customer;
 import vn.dungnt.webshop_be.entity.RoleEnum;
+import vn.dungnt.webshop_be.exception.NotFoundException;
+import vn.dungnt.webshop_be.repository.AccountRepository;
 import vn.dungnt.webshop_be.service.AuthService;
+import vn.dungnt.webshop_be.service.CustomerService;
 import vn.dungnt.webshop_be.service.RefreshTokenService;
 
 import java.time.LocalDateTime;
@@ -31,6 +37,8 @@ public class AuthController {
   @Autowired private JwtTokenProvider tokenProvider;
   @Autowired private AuthService authService;
   @Autowired private RefreshTokenService refreshTokenService;
+  @Autowired private CustomerService customerService;
+  @Autowired private AccountRepository accountRepository;
 
   @PostMapping("/login-admin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -65,7 +73,60 @@ public class AuthController {
           new LoginResponse(
               accessToken,
               refreshToken,
-              System.currentTimeMillis() + tokenProvider.getAccessTokenExpiration()));
+              System.currentTimeMillis() + tokenProvider.getAccessTokenExpiration(),
+              null));
+
+    } catch (BadCredentialsException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(
+              new ErrorResponse(
+                  HttpStatus.UNAUTHORIZED.value(),
+                  "Tên đăng nhập hoặc mật khẩu không đúng",
+                  null,
+                  LocalDateTime.now()));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(
+              new ErrorResponse(
+                  HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                  "Đã xảy ra lỗi: " + e.getMessage(),
+                  null,
+                  LocalDateTime.now()));
+    }
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<?> authenticateCustomer(@Valid @RequestBody LoginRequest loginRequest) {
+    try {
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  loginRequest.getUsername(), loginRequest.getPassword()));
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      String accessToken = tokenProvider.generateToken(authentication);
+      String refreshToken = tokenProvider.generateRefreshToken(authentication);
+      Long expiresAt = System.currentTimeMillis() + tokenProvider.getAccessTokenExpiration();
+
+      // Lấy thông tin người dùng
+      UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+      String username = userDetails.getUsername();
+
+      // Tìm Customer trong database
+      Customer customer =
+          (Customer)
+              accountRepository
+                  .findByUsername(username)
+                  .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
+
+      // Chuyển đổi Customer thành CustomerDTO
+      CustomerDTO customerDTO = customerService.convertToDTO(customer);
+
+      // Trả về token và thông tin người dùng
+      LoginResponse response = new LoginResponse(accessToken, refreshToken, expiresAt, customerDTO);
+
+      return ResponseEntity.ok(response);
 
     } catch (BadCredentialsException e) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -106,6 +167,6 @@ public class AuthController {
 
     return ResponseEntity.ok(
         new LoginResponse(
-            tokenResponse.getAccessToken(), refreshToken, tokenResponse.getExpiresAt()));
+            tokenResponse.getAccessToken(), refreshToken, tokenResponse.getExpiresAt(), null));
   }
 }
