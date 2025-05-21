@@ -40,6 +40,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
+                    // Các endpoint công khai - thêm /api/customers/search vào đây
                     .requestMatchers(
                         "/api/auth/register",
                         "/api/auth/login-admin",
@@ -47,18 +48,14 @@ public class SecurityConfig {
                         "/api/auth/refresh-token",
                         "/api/categories/**",
                         "/api/products/search",
-                        "api/products/detail/**")
+                        "api/products/detail/**",
+                        "/api/customers/search")
                     .permitAll()
-
-                    // Các endpoint admin
-                    .requestMatchers("/api/admin/**")
-                    .hasRole("ADMIN")
-
-                    // Các endpoint của salesman, customer
+                    // Các quy tắc khác vẫn giữ nguyên
+                    .requestMatchers("/api/customers/admin/**")
+                    .hasAuthority("ROLE_ADMIN")
                     .requestMatchers("/api/customers/**")
-                    .hasAnyRole("ADMIN", "CUSTOMER")
-
-                    // Mặc định: yêu cầu xác thực
+                    .hasAnyAuthority("ROLE_ADMIN", "ROLE_CUSTOMER")
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
