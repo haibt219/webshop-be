@@ -45,7 +45,6 @@ public class SecurityConfig {
                         "/api/auth/login-admin",
                         "/api/auth/login",
                         "/api/auth/refresh-token",
-                        "/api/customers/**",
                         "/api/categories/**",
                         "/api/products/search",
                         "api/products/detail/**")
@@ -56,8 +55,8 @@ public class SecurityConfig {
                     .hasRole("ADMIN")
 
                     // Các endpoint của salesman, customer
-                    .requestMatchers("/api/sales/**")
-                    .hasAnyRole("ADMIN", "SALESMAN", "CUSTOMER")
+                    .requestMatchers("/api/customers/**")
+                    .hasAnyRole("ADMIN", "CUSTOMER")
 
                     // Mặc định: yêu cầu xác thực
                     .anyRequest()
