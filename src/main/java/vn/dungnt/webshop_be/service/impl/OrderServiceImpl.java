@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     return OrderDTO.fromEntity(order);
   }
 
+  // Sửa phương thức createOrder để sử dụng giá và discount từ FE
   @Override
   @Transactional
   public OrderDTO createOrder(OrderCreateRequest requestDTO) {
@@ -68,8 +69,9 @@ public class OrderServiceImpl implements OrderService {
     for (OrderItemRequest item : requestDTO.getProducts()) {
       Long productId = item.getProductId();
       Integer quantity = item.getQuantity();
+      Integer clientPrice = item.getPrice();
+      Integer clientDiscount = item.getDiscount();
 
-      // Lấy thông tin sản phẩm từ database
       Product product =
           productRepository
               .findById(productId)
@@ -82,53 +84,30 @@ public class OrderServiceImpl implements OrderService {
       orderDetail.setProductId(product.getId());
       orderDetail.setProductName(product.getName());
 
-      // Đảm bảo productCode không null
       String productCode = "P" + product.getId();
+      if (productCode == null || productCode.isEmpty()) {
+        productCode = "P" + product.getId();
+      }
       orderDetail.setProductCode(productCode);
-
       orderDetail.setProductImage(product.getImage());
       orderDetail.setQuantity(quantity);
 
-      // Sử dụng giá hiện tại của sản phẩm (có thể là giá khuyến mãi)
-      BigDecimal currentPrice = product.getCurrentPrice();
-      if (currentPrice == null) {
-        currentPrice = product.getPrice();
+      if (clientPrice != null) {
+        orderDetail.setPrice(new BigDecimal(clientPrice));
+      } else {
+        orderDetail.setPrice(product.getPrice());
       }
-      orderDetail.setPrice(currentPrice);
 
-      // Tính toán discount nếu có
-      ProductDiscount activeDiscount = product.getActiveDiscount();
-      if (activeDiscount != null) {
-        BigDecimal originalPrice = product.getPrice();
-        BigDecimal discountPrice = product.getCurrentPrice();
-        if (originalPrice != null && discountPrice != null) {
-          BigDecimal discountAmount = originalPrice.subtract(discountPrice);
-
-          // Nếu có giảm giá, lưu lại giá trị giảm giá cho item này
-          if (discountAmount.compareTo(BigDecimal.ZERO) > 0) {
-            // Tổng giảm giá cho số lượng sản phẩm này
-            orderDetail.setDiscount(discountAmount.multiply(new BigDecimal(quantity)));
-          } else {
-            orderDetail.setDiscount(BigDecimal.ZERO);
-          }
-        } else {
-          orderDetail.setDiscount(BigDecimal.ZERO);
-        }
+      if (clientDiscount != null) {
+        orderDetail.setDiscount(new BigDecimal(clientDiscount));
       } else {
         orderDetail.setDiscount(BigDecimal.ZERO);
       }
 
-      // Thêm OrderDetail vào Order thông qua phương thức addItem
       order.addItem(orderDetail);
     }
-
-    // Tính toán lại tổng tiền để đảm bảo tính chính xác
     order.calculateTotalAmount();
-
-    // Lưu Order vào database
     Order savedOrder = orderRepository.save(order);
-
-    // Trả về OrderDTO
     return OrderDTO.fromEntity(savedOrder);
   }
 
