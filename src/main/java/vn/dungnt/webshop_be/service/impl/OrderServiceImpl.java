@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
     order.setShippingCost(requestDTO.getShippingCost());
     order.setNotes(requestDTO.getNotes());
     order.setCustomerId(requestDTO.getCustomerId());
-    order.setTotalAmount(BigDecimal.ZERO); // Tạm thời đặt tổng tiền là 0, sẽ cập nhật sau
+    order.setTotalAmount(BigDecimal.ZERO);
 
     // Lấy thông tin sản phẩm từ database và tạo OrderDetail cho mỗi sản phẩm
     for (OrderItemRequest item : requestDTO.getProducts()) {
@@ -79,8 +79,6 @@ public class OrderServiceImpl implements OrderService {
 
       // Tạo OrderDetail
       OrderDetail orderDetail = new OrderDetail();
-      // Không đặt ID, để JPA tự động tạo
-      // orderDetail.setId(null);
       orderDetail.setProductId(product.getId());
       orderDetail.setProductName(product.getName());
 
@@ -94,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
       // Sử dụng giá hiện tại của sản phẩm (có thể là giá khuyến mãi)
       BigDecimal currentPrice = product.getCurrentPrice();
       if (currentPrice == null) {
-        currentPrice = product.getPrice(); // Sử dụng giá gốc nếu không có giá hiện tại
+        currentPrice = product.getPrice();
       }
       orderDetail.setPrice(currentPrice);
 

@@ -26,7 +26,6 @@ import vn.dungnt.webshop_be.exception.NotFoundException;
 import vn.dungnt.webshop_be.repository.AccountRepository;
 import vn.dungnt.webshop_be.service.AuthService;
 import vn.dungnt.webshop_be.service.CustomerService;
-import vn.dungnt.webshop_be.service.RefreshTokenService;
 
 import java.time.LocalDateTime;
 
@@ -36,7 +35,6 @@ public class AuthController {
   @Autowired private AuthenticationManager authenticationManager;
   @Autowired private JwtTokenProvider tokenProvider;
   @Autowired private AuthService authService;
-  @Autowired private RefreshTokenService refreshTokenService;
   @Autowired private CustomerService customerService;
   @Autowired private AccountRepository accountRepository;
 

@@ -40,12 +40,12 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    // Các endpoint không cần xác thực
                     .requestMatchers(
                         "/api/auth/register",
                         "/api/auth/login-admin",
                         "/api/auth/login",
                         "/api/auth/refresh-token",
+                        "/api/customers/**",
                         "/api/categories/**",
                         "/api/products/search",
                         "api/products/detail/**")
