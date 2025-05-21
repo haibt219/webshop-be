@@ -44,7 +44,7 @@ public class OrderDetail {
   @Column(precision = 12, scale = 2)
   private BigDecimal discount;
 
-  @Column private String variation; // Biến thể sản phẩm (màu sắc, kích thước, v.v.)
+  @Column private String variation;
 
   // Tính tổng tiền của item này (price * quantity - discount)
   @Transient

@@ -15,9 +15,7 @@ public class OrderDetailDTO {
   private BigDecimal price;
   private BigDecimal discount;
   private String variation;
-  private BigDecimal subtotal;
 
-  // Chuyển đổi từ Entity sang DTO
   public static OrderDetailDTO fromEntity(OrderDetail entity) {
     OrderDetailDTO dto = new OrderDetailDTO();
     dto.setId(entity.getId());
@@ -30,11 +28,9 @@ public class OrderDetailDTO {
     dto.setPrice(entity.getPrice());
     dto.setDiscount(entity.getDiscount());
     dto.setVariation(entity.getVariation());
-    dto.setSubtotal(entity.getSubtotal());
     return dto;
   }
 
-  // Chuyển đổi từ DTO sang Entity
   public OrderDetail toEntity() {
     OrderDetail entity = new OrderDetail();
     entity.setId(this.id);
@@ -46,8 +42,6 @@ public class OrderDetailDTO {
     entity.setPrice(this.price);
     entity.setDiscount(this.discount);
     entity.setVariation(this.variation);
-
-    // Không thiết lập Order ở đây vì sẽ được thiết lập từ OrderDTO
     return entity;
   }
 
@@ -129,13 +123,5 @@ public class OrderDetailDTO {
 
   public void setVariation(String variation) {
     this.variation = variation;
-  }
-
-  public BigDecimal getSubtotal() {
-    return subtotal;
-  }
-
-  public void setSubtotal(BigDecimal subtotal) {
-    this.subtotal = subtotal;
   }
 }
